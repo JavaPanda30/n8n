@@ -11,6 +11,7 @@ import type { ClientOptions } from 'openai';
 
 import { logWrapper } from '@utils/logWrapper';
 import { getConnectionHintNoticeField } from '@utils/sharedFields';
+import { getProxyAgent } from '@utils/httpProxyAgent';
 
 const modelParameter: INodeProperties = {
 	displayName: 'Model',
@@ -220,7 +221,12 @@ export class EmbeddingsOpenAi implements INodeType {
 			options.timeout = undefined;
 		}
 
-		const configuration: ClientOptions = {};
+		const configuration: ClientOptions = {
+			fetchOptions: {
+				dispatcher: getProxyAgent(options.baseURL ?? credentials.url as string ?? 'https://api.openai.com/v1'),
+			},
+		};
+
 		if (options.baseURL) {
 			configuration.baseURL = options.baseURL;
 		} else if (credentials.url) {
